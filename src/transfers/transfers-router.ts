@@ -33,6 +33,14 @@ transfersRouter
     const {user} = req.body;
     const paramUserId = parseInt(req.params.id);
 
+    if (paramUserId === undefined) {
+      return res
+        .status(401)
+        .json({
+          error: `Id must be a number`,
+        });
+    };
+
     if (user.id !== paramUserId) {
       return res
         .status(401)

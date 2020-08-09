@@ -68,6 +68,28 @@ describe('Transfers API at /transfers', () => {
     });
   });
 
+  describe('ALL /user/:id', () => {
+    context(`Error - id is not a number`, () => {
+      const requiredTestTables = ['users'];
+
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it('responds with 400 and Id must be a number', () => {
+        return supertest(app)
+          .get('/transfers/user/abc')
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .expect(res => {
+            console.log(res.body)
+            expect(res.body).to.deep.equal({
+              error: `Id must be a number`
+            });
+          });
+      });
+    });
+  });
+
   describe('GET /user/:id', () => {
     context(`Given there aren't transfers`, () => {
       const requiredTestTables = ['users'];
@@ -108,24 +130,54 @@ describe('Transfers API at /transfers', () => {
   describe('POST /user/:id', () => {
     context(`Success - creating a new post`, () => {
       const requiredTestTables = ['users'];
-      const newPost = testHelpers.generateTransfers()[0];
-      const expectedPost = {
-        ...newPost,
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
       };
 
       it(`responds with 201 and the new post`, () => {
         return supertest(app)
           .post('/transfers/user/1')
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
-          .expect(201, expectedPost);
+          .send(newPost)
+          .expect(201)
+          .expect(res => {
+            expect(res.body).to.deep.equal(expectedPost);
+          });
+      });
+    });
+
+    context(`Error - Missing key in request body`, () => {
+      const requiredTestTables = ['users'];
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
+      };
+      delete expectedPost.receiver;
+
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it(`responds with 400 and Missing receiver in request body`, () => {
+        return supertest(app)
+          .post('/transfers/user/1')
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPost)
+          .expect(400)
+          .expect(res => {
+            expect(res.body).to.deep.equal({
+              error: `Missing receiver in request body`
+            });
+          });
       });
     });
 
     context(`Error - receiver not a number`, () => {
       const requiredTestTables = ['users'];
-      const newPost = testHelpers.generateTransfers()[0];
-      const expectedPost = {
-        ...newPost,
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
         receiver: '2'
       };
 
@@ -137,6 +189,7 @@ describe('Transfers API at /transfers', () => {
         return supertest(app)
           .post('/transfers/user/1')
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPost)
           .expect(400)
           .expect(res => {
             console.log(res.body)
@@ -149,9 +202,9 @@ describe('Transfers API at /transfers', () => {
 
     context(`Error - amount should be a number`, () => {
       const requiredTestTables = ['users'];
-      const newPost = testHelpers.generateTransfers()[0];
-      const expectedPost = {
-        ...newPost,
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
         amount: '2342.22'
       };
 
@@ -163,6 +216,7 @@ describe('Transfers API at /transfers', () => {
         return supertest(app)
           .post('/transfers/user/1')
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPost)
           .expect(400)
           .expect(res => {
             console.log(res.body)
@@ -175,9 +229,9 @@ describe('Transfers API at /transfers', () => {
 
     context(`Error - user and receiver cannot match`, () => {
       const requiredTestTables = ['users'];
-      const newPost = testHelpers.generateTransfers()[0];
-      const expectedPost = {
-        ...newPost,
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
         sender: 1,
         receiver: 1
       };
@@ -190,6 +244,7 @@ describe('Transfers API at /transfers', () => {
         return supertest(app)
           .post('/transfers/user/1')
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPost)
           .expect(400)
           .expect(res => {
             console.log(res.body)
@@ -202,9 +257,9 @@ describe('Transfers API at /transfers', () => {
 
     context(`Error - receiver not found`, () => {
       const requiredTestTables = ['users'];
-      const newPost = testHelpers.generateTransfers()[0];
-      const expectedPost = {
-        ...newPost,
+      const expectedPost = testHelpers.generateTransfers()[0];
+      const newPost = {
+        ...expectedPost,
         sender: 1,
         receiver: 1
       };
@@ -217,6 +272,7 @@ describe('Transfers API at /transfers', () => {
         return supertest(app)
           .post('/transfers/user/1')
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPost)
           .expect(404)
           .expect(res => {
             console.log(res.body)
