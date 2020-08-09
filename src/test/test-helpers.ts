@@ -1,3 +1,5 @@
+import AuthService from '../auth/auth-service';
+
 class TestHelpers {
 
   public tableGeneratorFunctions = {
@@ -6,13 +8,26 @@ class TestHelpers {
     'users': this.generateUsers(),
   };
 
-  public truncateTables(db, tables) {
-    tables.forEach(table => {
-      db
-        .raw(`truncate ${table}`)
-        .then(() => {});
-    });
-  };
+  // getAuthToken(user) => token
+  public generateAuthToken(user) {
+    return AuthService.createJWT(user.username, {user_id: user.id});
+  }
+
+  public dropTables(db) {
+    db
+      .raw(`
+        DROP TABLE IF EXISTS payees cascade;
+        DROP TABLE IF EXISTS transfers cascade;
+        DROP TABLE IF EXISTS users cascade;
+      `);
+  }
+
+  public truncateTables(db) {
+    return db
+      .raw(`
+        truncate table payees, transfers, users cascade;
+      `)
+  }
 
   public seedTables(db, tables) {
     tables.forEach(table => {
@@ -64,8 +79,8 @@ class TestHelpers {
         'payee': 2
       },
       {
-        'sender': 1,
-        'payee': 2
+        'sender': 2,
+        'payee': 3
       },
       {
         'sender': 3,

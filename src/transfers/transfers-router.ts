@@ -33,6 +33,14 @@ transfersRouter
     const {user} = req.body;
     const paramUserId = parseInt(req.params.id);
 
+    if (paramUserId === undefined) {
+      return res
+        .status(401)
+        .json({
+          error: `Id must be a number`,
+        });
+    };
+
     if (user.id !== paramUserId) {
       return res
         .status(401)
@@ -52,7 +60,7 @@ transfersRouter
       const transfers = await TransfersService.getTransfersByUser(knexInstance, paramUserId);
 
       return res
-        .status(201)
+        .status(200)
         .json(transfers);
     } catch(err) {
       next(err);
@@ -75,7 +83,7 @@ transfersRouter
 
     if (typeof receiver !== 'number') {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Receiver should be a number`,
         });
@@ -83,7 +91,7 @@ transfersRouter
 
     if (typeof amount !== 'number') {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Amount should be a number`,
         });
@@ -91,7 +99,7 @@ transfersRouter
 
     if (receiver === paramUserId) {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `User and receiver cannot match`,
         });
@@ -112,7 +120,7 @@ transfersRouter
 
       if (!successfulTransfer) {
         return res
-          .status(404)
+          .status(400)
           .json({
             error: `Transfer not completed`,
           });

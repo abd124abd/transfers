@@ -12,7 +12,16 @@ payeesRouter
     const knexInstance = req.app.get('db');
 
     const {user} = req.body;
+
     const sender = parseInt(req.params.id);
+
+    if (sender === undefined) {
+      return res
+        .status(401)
+        .json({
+          error: `Id must be a number`,
+        });
+    };
 
     if (user.id !== sender) {
       return res
@@ -33,7 +42,7 @@ payeesRouter
       const payees = await PayeesService.getAllPayeesBySender(knexInstance, sender);
 
       return res
-        .status(201)
+        .status(200)
         .json(payees);
     } catch(err) {
       next(err);
@@ -86,14 +95,6 @@ payeesRouter
 
       const newPayee = await PayeesService.addPayee(knexInstance, sender, payee);
 
-      if (!newPayee) {
-        return res
-          .status(404)
-          .json({
-            error: `Payee not added`
-          });
-      };
-
       return res
         .status(201)
         .json(newPayee);
@@ -132,19 +133,11 @@ payeesRouter
         return res
           .status(404)
           .json({
-            error: `Payee is not assigned`,
+            error: `Payee is not assigned to this Sender`,
           });
       };
 
       const deletedPayee = await PayeesService.deletePayee(knexInstance, sender, payee);
-
-      if (!deletedPayee) {
-        return res
-          .status(404)
-          .json({
-            error: `Payee not deleted`,
-          });
-      };
 
       return res
         .status(204)
