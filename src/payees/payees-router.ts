@@ -17,7 +17,7 @@ payeesRouter
 
     if (sender === undefined) {
       return res
-        .status(401)
+        .status(400)
         .json({
           error: `Id must be a number`,
         });
@@ -25,7 +25,7 @@ payeesRouter
 
     if (user.id !== sender) {
       return res
-        .status(401)
+        .status(400)
         .json({
           error: `User does not match ID provided`,
         });
@@ -56,7 +56,7 @@ payeesRouter
     if (!req.body.hasOwnProperty('payee') ||
         typeof req.body.payee !== 'number') {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Payee needs to be of type number`,
         });
@@ -66,7 +66,7 @@ payeesRouter
 
     if (sender === payee) {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Sender and payee cannot match`,
         });
@@ -77,7 +77,7 @@ payeesRouter
 
       if (!payeeUser) {
         return res
-          .status(404)
+          .status(400)
           .json({
             error: `Payee not found`,
           });
@@ -87,7 +87,7 @@ payeesRouter
 
       if (senderPayeeEntry.length > 0) {
         return res
-          .status(404)
+          .status(400)
           .json({
             error: `Payee is already assigned to sender`,
           });
@@ -110,7 +110,7 @@ payeesRouter
     if (!req.body.hasOwnProperty('payee') ||
         typeof req.body.payee !== 'number') {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Payee needs to be of type number`,
         });
@@ -120,7 +120,7 @@ payeesRouter
 
     if (sender === payee) {
       return res
-        .status(404)
+        .status(400)
         .json({
           error: `Sender and payee cannot match`,
         });
@@ -131,7 +131,7 @@ payeesRouter
 
       if (senderPayeeEntry.length < 1) {
         return res
-          .status(404)
+          .status(400)
           .json({
             error: `Payee is not assigned to this Sender`,
           });

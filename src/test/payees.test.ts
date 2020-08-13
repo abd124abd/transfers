@@ -132,7 +132,7 @@ describe('Payees API at /payees', () => {
           .post(`/payees/${newPayee.sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
           .send(newPayee)
-          .expect(201)
+          .expect(400)
           .expect(res => {
             expect(res.body).to.deep.equal({
               error: `Payee needs to be of type number`,
@@ -159,7 +159,7 @@ describe('Payees API at /payees', () => {
           .post(`/payees/${newPayee.sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
           .send(newPayee)
-          .expect(201)
+          .expect(400)
           .expect(res => {
             expect(res.body).to.deep.equal({
               error: `Payee needs to be of type number`,
@@ -186,7 +186,7 @@ describe('Payees API at /payees', () => {
           .post(`/payees/${newPayee.sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
           .send(newPayee)
-          .expect(201)
+          .expect(400)
           .expect(res => {
             expect(res.body).to.deep.equal({
               error: `Sender and payee cannot match`,
@@ -208,12 +208,12 @@ describe('Payees API at /payees', () => {
         testHelpers.seedTables(db, requiredTestTables);
       });
 
-      it(`responds with 400 and Sender and payee cannot match`, () => {
+      it(`responds with 400 and Payee not found`, () => {
         return supertest(app)
           .post(`/payees/${newPayee.sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
           .send(newPayee)
-          .expect(201)
+          .expect(400)
           .expect(res => {
             expect(res.body).to.deep.equal({
               error: `Payee not found`,
@@ -234,12 +234,12 @@ describe('Payees API at /payees', () => {
         testHelpers.seedTables(db, requiredTestTables);
       });
 
-      it(`responds with 400 and Sender and payee cannot match`, () => {
+      it(`responds with 400 and Payee is already assigned to sender`, () => {
         return supertest(app)
           .post(`/payees/${newPayee.sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
           .send(newPayee)
-          .expect(201)
+          .expect(400)
           .expect(res => {
             expect(res.body).to.deep.equal({
               error: `Payee is already assigned to sender`,
@@ -255,6 +255,9 @@ describe('Payees API at /payees', () => {
       const requiredTestTables = ['users', 'payees'];
       const payeeToDelete = testHelpers.generatePayees()[0];
       const { sender, payee } = payeeToDelete;
+      const existingPayee = {
+        payee,
+      }
 
       beforeEach(() => {
         testHelpers.seedTables(db, requiredTestTables);
@@ -264,18 +267,118 @@ describe('Payees API at /payees', () => {
         return supertest(app)
           .delete(`/payees/${sender}`)
           .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
-          .send({payee})
+          .send(existingPayee)
           .expect(204);
       });
     });
-  });
 
     // error - payee not provided
+    context(`Error - Payee not provided`, () => {
+      const requiredTestTables = ['users', 'payees'];
+      const payeeToDelete = testHelpers.generatePayees()[0];
+      const { sender } = payeeToDelete;
+      const newPayee = {}
+
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it(`responds with 400 and Payee needs to be of type number`, () => {
+        return supertest(app)
+          .post(`/payees/${sender}`)
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPayee)
+          .expect(400)
+          .expect(res => {
+            expect(res.body).to.deep.equal({
+              error: `Payee needs to be of type number`,
+            });
+          });
+      });
+    });
 
     // error - payee not a number
+    context(`Error - payee needs to be of type number`, () => {
+      const requiredTestTables = ['users', 'payees'];
+      const payeeToDelete = testHelpers.generatePayees()[0];
+      const { sender, payee } = payeeToDelete;
+      const newPayee = {
+        sender,
+        payee: '1'
+      }
+
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it(`responds with 400 and Payee needs to be of type number`, () => {
+        return supertest(app)
+          .post(`/payees/${sender}`)
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPayee)
+          .expect(400)
+          .expect(res => {
+            expect(res.body).to.deep.equal({
+              error: `Payee needs to be of type number`,
+            });
+          });
+      });
+    });
 
     // error - sender = payee
+    context(`Error - sender matches payee`, () => {
+      const requiredTestTables = ['users', 'payees'];
+      const payeeToDelete = testHelpers.generatePayees()[0];
+      const { sender, payee } = payeeToDelete;
+      const newPayee = {
+        sender,
+        payee: sender
+      }
+
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it(`responds with 400 and Sender and payee cannot match`, () => {
+        return supertest(app)
+          .post(`/payees/${sender}`)
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPayee)
+          .expect(400)
+          .expect(res => {
+            expect(res.body).to.deep.equal({
+              error: `Sender and payee cannot match`,
+            });
+          });
+      });
+    });
 
     // error - payee not assigned to sender
+    context(`Error - payee not assigned to sender`, () => {
+      const requiredTestTables = ['users', 'payees'];
+      const payeeToDelete = testHelpers.generatePayees()[0];
+      const { sender, payee } = payeeToDelete;
+      const newPayee = {
+        sender,
+        payee: sender
+      }
 
+      beforeEach(() => {
+        testHelpers.seedTables(db, requiredTestTables);
+      });
+
+      it(`responds with 400 and Payee is not assigned to this Sender`, () => {
+        return supertest(app)
+          .post(`/payees/${sender}`)
+          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
+          .send(newPayee)
+          .expect(400)
+          .expect(res => {
+            expect(res.body).to.deep.equal({
+              error: `Payee is not assigned to this Sender`,
+            });
+          });
+      });
+    });
+  });
 });
