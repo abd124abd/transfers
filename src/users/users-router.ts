@@ -10,6 +10,14 @@ usersRouter
 
     const id = parseInt(req.params.id);
 
+    if (id === undefined) {
+      return res
+        .status(400)
+        .json({
+          error: `Id must be a number`,
+        });
+    }
+
     try {
       const user = await UsersService.getUserById(knexInstance, id);
       if(!user) {
@@ -18,7 +26,7 @@ usersRouter
         });
       };
 
-      return res.json(UsersService.serializeGetUser(user));
+      return res.status(201).json(UsersService.serializeGetUser(user));
     } catch(err) {
       next(err);
     };
@@ -53,7 +61,7 @@ usersRouter
         return res
           .status(401)
           .json({
-            error: `Password length must be betwen 8 and 64 characters`,
+            error: `Password length must be between 8 and 64 characters`,
           });
       };
 
