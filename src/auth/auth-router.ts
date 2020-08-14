@@ -31,13 +31,13 @@ authRouter
 
       const passwordsMatch = await AuthService.comparePasswords(password, user.password);
       if (!passwordsMatch) {
-        return res.status(404).json({
+        return res.status(400).json({
           error: "Password is incorrect"
         });
       };
 
       return res
-      .status(201)
+      .status(200)
       .json({
         user: UsersService.serializeGetUser(user),
         authToken: AuthService.createJWT(user.username, {user_id: user.id})
