@@ -7,7 +7,6 @@ import { expect } from 'chai';
 
 const { TEST_DB_URL } = config;
 const testHelpers = new TestHelpers();
-const users = testHelpers.generateUsers();
 
 describe('Users API at /users', () => {
   let db;
@@ -100,11 +99,7 @@ describe('Users API at /users', () => {
       const user = {
         'username': 'userFromTest',
         'password': 'abc123abc'
-      }
-
-      beforeEach(() => {
-        testHelpers.seedTables(db, requiredTestTables)
-      });
+      };
 
       it('responds with 201 and the user serialized', () => {
         return supertest(app)
