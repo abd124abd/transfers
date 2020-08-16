@@ -83,7 +83,7 @@ transfersRouter
       };
     };
 
-    if (typeof transfer.amount !== 'number') {
+    if (isNaN(transfer.amount)) {
       return res
         .status(400)
         .json({
