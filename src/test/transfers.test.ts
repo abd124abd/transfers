@@ -173,33 +173,6 @@ describe('Transfers API at /transfers', () => {
       });
     });
 
-    context(`Error - receiver not a number`, () => {
-      const requiredTestTables = ['users'];
-      const expectedTransfer = testHelpers.generateTransfers()[0];
-      const newTransfer = {
-        ...expectedTransfer,
-        receiver: '2'
-      };
-
-      beforeEach(() => {
-        testHelpers.seedTables(db, requiredTestTables);
-      });
-
-      it(`responds with 400 and Receiver should be a number`, () => {
-        return supertest(app)
-          .post('/transfers/user/1')
-          .set('Authorization', 'Bearer ' + testHelpers.generateAuthToken(users[0]))
-          .send(newTransfer)
-          .expect(400)
-          .expect(res => {
-            console.log(res.body)
-            expect(res.body).to.deep.equal({
-              error: `Receiver should be a number`
-            });
-          });
-      });
-    });
-
     context(`Error - amount should be a number`, () => {
       const requiredTestTables = ['users'];
       const expectedTransfer = testHelpers.generateTransfers()[0];

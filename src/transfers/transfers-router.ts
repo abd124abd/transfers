@@ -73,7 +73,7 @@ transfersRouter
 
     const {receiver, amount} = req.body;
     const paramUserId = parseInt(req.params.id);
-    const transfer = {sender: paramUserId, receiver, amount};
+    const transfer = {sender: paramUserId, receiver, amount: parseInt(amount)};
 
     for (const [key, value] of Object.entries(transfer)) {
       if (value === null || value === undefined) {
@@ -83,15 +83,7 @@ transfersRouter
       };
     };
 
-    if (typeof receiver !== 'number') {
-      return res
-        .status(400)
-        .json({
-          error: `Receiver should be a number`,
-        });
-    };
-
-    if (typeof amount !== 'number') {
+    if (typeof transfer.amount !== 'number') {
       return res
         .status(400)
         .json({
@@ -108,7 +100,7 @@ transfersRouter
     };
 
     try {
-      const receiverUser = await UsersService.getUserById(knexInstance, receiver);
+      const receiverUser = await UsersService.getUserByUsername(knexInstance, receiver);
 
       if (!receiverUser) {
         return res
@@ -118,6 +110,7 @@ transfersRouter
           });
       };
 
+      transfer.receiver = receiverUser.id;
       const successfulTransfer = await TransfersService.createTransfer(knexInstance, transfer);
 
       if (!successfulTransfer) {
