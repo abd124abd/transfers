@@ -6,10 +6,10 @@ interface TransfersService {
 
 const transfersService: TransfersService = {
   getAllTransfersTotal(knex) {
-    return knex
-      .from('transfers')
-      .sum('amount')
-      .first();
+    return knex.raw(`
+        SELECT sum(amount) as total, count(*) as count
+        FROM transfers;
+      `)
   },
   getTransfersByUser(knex, user) {
     return knex

@@ -12,14 +12,16 @@ transfersRouter
     const knexInstance = req.app.get('db');
 
     try {
-      const {sum} = await TransfersService.getAllTransfersTotal(knexInstance);
-      const result = {
-        total: sum !== null ? parseFloat(sum) : 0,
+      const result = await TransfersService.getAllTransfersTotal(knexInstance);
+      const {total, count} = result.rows[0];
+      const transfersData = {
+        total: total !== null ? parseFloat(total) : 0,
+        count: count !== null ? parseInt(count) : 0,
       };
 
       return res
         .status(200)
-        .json(result);
+        .json(transfersData);
     } catch(err) {
       next(err);
     };
